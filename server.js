@@ -43,7 +43,7 @@ app.get('/verify', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`API server is running on http://localhost:${PORT}`);
+    console.log(`Yeu nhi qua =))))`);
 });
 
 client.once('ready', () => {
@@ -210,14 +210,18 @@ client.on('interactionCreate', async interaction => {
             });
         });
     } else if (commandName === 'script') {
-        db.get('SELECT hwid FROM keys WHERE discord_id = ?', [user.id], (err, row) => {
+        db.get('SELECT key FROM keys WHERE discord_id = ?', [user.id], (err, row) => {
             if (err) {
                 interaction.reply({ content: 'An error occurred.', ephemeral: true });
                 logInteraction(`Error fetching HWID for user ${user.tag}: ${err.message}`);
                 return;
             }
             if (row) {
-                // Embed 1: Lời cảm ơn
+                const script = `
+_G.key = "${row.key}"
+_G.id = "${user.id}"
+loadstring(game:HttpGet("https://nhn.net/xxxxxx"))()
+                `;
                 const embed1 = new EmbedBuilder()
                     .setColor(0x00FF00)
                     .setTitle('Thank you from NHN')
@@ -226,10 +230,7 @@ client.on('interactionCreate', async interaction => {
 
                 // Embed 2: Script
                 const embed2 = new EmbedBuilder()
-                    .setColor(0x00FF00)
-                    .setTitle('Your Script')
-                    .setDescription(`\`\`\`lua\nlocal key = "${row.hwid ? row.hwid : 'Your_Hwid'}"\n-- Your script code here\n\`\`\``)
-                    .setTimestamp();
+                    .setDescription(`\`\`\`lua\n${script}\n\`\`\``)
 
                 interaction.reply({ embeds: [embed1, embed2], ephemeral: true });
                 logInteraction(`User ${user.tag} fetched their script.`);
